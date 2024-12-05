@@ -18,7 +18,7 @@
                 const localIP = ipMatch ? ipMatch[0] : null;
 
                 // 接続先ネットワークのIPアドレス範囲をチェック
-                if (localIP && localIP.startsWith("192.168.")) {
+                if (localIP && localIP.startsWith("192.168.2.")) {
                     // 条件に合う場合はリダイレクト
                     window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdHwtc_fkQFS5Oz7IW_YKG38JQzoGaeMjmS438absq9UhJIog/viewform?usp=sharing";
                 } else {

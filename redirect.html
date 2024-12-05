@@ -1,40 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ネットワーク検証</title>
+    <title>ネットワーク検証とリダイレクト</title>
     <script>
         function checkNetworkAndRedirect() {
-            // WebRTCを利用してローカルIPを取得する
             const peerConnection = new RTCPeerConnection({ iceServers: [] });
             peerConnection.createDataChannel('');
-            peerConnection.createOffer().then(offer => peerConnection.setLocalDescription(offer));
+            peerConnection.createOffer()
+                .then(offer => peerConnection.setLocalDescription(offer))
+                .catch(error => console.error('Offer作成エラー:', error));
 
             peerConnection.onicecandidate = (event) => {
                 if (!event || !event.candidate) return;
 
-                // IPアドレスの抽出
-                const ipRegex = /([0-9]{1,3}\.){3}[0-9]{1,3}/;
+                const ipRegex = /([0-9]{1,3}\.){3}[0-9]{1,3}/; // IPv4形式の正規表現
                 const ipMatch = event.candidate.candidate.match(ipRegex);
                 const localIP = ipMatch ? ipMatch[0] : null;
 
-                // 接続先ネットワークのIPアドレス範囲をチェック
-                if (localIP && localIP.startsWith("192.168.2.")) {
-                    // 条件に合う場合はリダイレクト
-                    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdHwtc_fkQFS5Oz7IW_YKG38JQzoGaeMjmS438absq9UhJIog/viewform?usp=sharing";
-                } else {
-                    alert("このネットワークからはアクセスできません。");
+                if (localIP) {
+                    console.log('検出されたIP:', localIP);
+
+                    // 条件を満たす場合にリダイレクト
+                    if (localIP.startsWith("192.168.2.")) {
+                        console.log("ネットワーク条件を満たしています。リダイレクトします。");
+                        window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdwtc_fkQc550i7ZL_YkG632j0oE6aJm5s43ba6b9JhlO1uzg/viewform?usp=sharing";
+                    } else {
+                        console.log("条件を満たしていません。");
+                        alert("正しいネットワークに接続されていません。");
+                    }
+
+                    peerConnection.close(); // コネクションを閉じる
                 }
-                peerConnection.close();
             };
+
+            // エラーハンドリング: タイムアウト設定
+            setTimeout(() => {
+                console.error("IPアドレスの検出に失敗しました。");
+                alert("ネットワークの確認に失敗しました。もう一度お試しください。");
+                peerConnection.close();
+            }, 5000); // 5秒でタイムアウト
         }
     </script>
 </head>
 <body>
     <h1>ネットワーク確認中...</h1>
     <script>
-        // ページ読み込み時にネットワークをチェック
         checkNetworkAndRedirect();
     </script>
 </body>
 </html>
-
